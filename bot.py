@@ -36,7 +36,7 @@ counter = 0
 def get_text_messages(message):
     if (message.text == '/start'):
         bot.send_message(message.from_user.id, 'Отправь ссылку на тикток или ютуб')
-    if (message.text == '/help'):
+    elif (message.text == '/help'):
         bot.send_message(message.from_user.id, 'Отправь ссылку на тикток или ютуб')
     else:
         global counter
