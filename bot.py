@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 ####
-from os import remove, system
+from os import remove
 import subprocess
 import sys
 from time import sleep
 import telebot;
 import yt_dlp;
+import datetime
+import time
 
 def help():
     print('Create bot in https://t.me/BotFather and put token to script or with -t argument')
@@ -32,6 +34,10 @@ while(argIdx < len(sys.argv)):
 
 bot = telebot.TeleBot(token)
 counter = 0
+
+with open('log.txt', 'a') as f:
+    f.write("launched {}\n".format(datetime.datetime.now()))
+
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     if (message.text == '/start'):
@@ -54,6 +60,8 @@ def get_text_messages(message):
                     'outtmpl': 'video{}.mp4'.format(current_counter)
                 }).download(message.text)
             except:
+                with open('log.txt', 'a') as f:
+                    f.write("{} failed {} request {}\n".format(current_counter, message.from_user.id, message.text))
                 bot.send_message(message.from_user.id, 'Нерабочая ссылка')
             print('{} loaded::: {}'.format(current_counter, message.text))
             
@@ -61,7 +69,21 @@ def get_text_messages(message):
             print('{} sended::: {}'.format(current_counter, message.text))
             
             remove('video{}.mp4'.format(current_counter))
+            with open('log.txt', 'a') as f:
+                f.write("{} success {} request {}\n".format(current_counter, message.from_user.id, message.text))
         except:
+            with open('log.txt', 'a') as f:
+                f.write("{} bot failed {} request {}\n".format(current_counter, message.from_user.id, message.text))
             print('telegram bot died')
         print('{} done::::: {}'.format(current_counter, message.text))
-bot.polling(none_stop=True, interval=0)
+while(True):
+    try:
+        bot.polling(none_stop=True, interval=0)
+        print('telegram bot restart')
+        with open('log.txt', 'a') as f:
+            f.write("{} bot restart\n".format(counter))
+    except:
+        print('telegram bot died in loop')
+        with open('log.txt', 'a') as f:
+            f.write("{} bot died. Restarting\n".format(counter))
+        sleep(15)
